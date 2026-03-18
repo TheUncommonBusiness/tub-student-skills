@@ -1,24 +1,10 @@
 ---
 name: idea-validator
-version: "1.0.1"
-description: >-
-  Pressure-test a digital product idea before building it. Scores across 5
-  dimensions (Demand, Existing Solutions, Scope Reality, Monetization Clarity,
-  Unfair Advantage) and delivers a BUILD, RESHAPE, or SHELF verdict. Trigger
-  on validate my idea, should I build this, is this worth building, pressure
-  test my idea, evaluate my app idea, I have an idea for an app, rate my idea,
-  will this work, is this a good product idea, or when someone describes a
-  product concept and wants honest feedback. Also trigger when someone mentions
-  building with Replit, Bolt, Lovable, Cursor, or another AI app builder and
-  wants to know if their idea is viable.
-metadata:
-  audience: "student"
-  cowork_compatible: true
-  requires_cli: []
-  requires_env: []
+version: "1.0.2"
+description: "Pressure-test a digital product idea before building it. Scores across 5 dimensions and delivers a BUILD, RESHAPE, or SHELF verdict. Trigger on validate my idea, should I build this, is this worth building, pressure test my idea, evaluate my app idea, rate my idea, will this work, or when someone describes a product concept and wants honest feedback."
 ---
 
-> **v1.0.1** | Built by Carter Jensen | 2026-03-18
+> **v1.0.2** | Built by Carter Jensen | 2026-03-18
 
 # Idea Validator — Pressure-Test Before You Build
 
