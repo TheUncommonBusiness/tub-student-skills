@@ -30,6 +30,17 @@
       },
       "keywords": ["skills", "automation", "building"],
       "category": "productivity"
+    },
+    {
+      "name": "tub-skills-browser",
+      "source": "./plugins/tub-skills-browser",
+      "description": "Browse all available TUB student skills. Type /tub-skills to see what is available.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Carter Jensen"
+      },
+      "keywords": ["browse", "list", "help", "discovery"],
+      "category": "utility"
     }
   ]
 }
