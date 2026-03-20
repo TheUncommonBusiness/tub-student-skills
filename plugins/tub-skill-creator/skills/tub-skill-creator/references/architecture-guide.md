@@ -19,9 +19,32 @@ Think of it like building a house. You don't start nailing boards together — y
 
 ---
 
-## The Three Design Decisions
+## Start Simple (Default Path)
 
-Every skill's architecture comes down to three questions:
+Most skills — especially knowledge/advisor skills built from source content — work best with a flat structure:
+
+```
+my-skill/
+├── SKILL.md              ← Diagnostic flow + format + quality checks (~80-150 lines)
+└── references/
+    └── knowledge.md      ← All distilled domain knowledge (~150-250 lines)
+```
+
+This is the right structure when:
+- The skill applies one body of knowledge to user questions
+- You're turning transcripts, books, or frameworks into an advisor
+- There aren't genuinely different domains requiring different files
+- Loading ALL the knowledge on every request is fine (total under ~300 lines)
+
+**Why simple outperforms complex for most skills**: Research on LLM performance shows that every additional document loaded into context actively degrades accuracy — even when the model can perfectly retrieve the information. A single well-distilled 200-line reference file consistently outperforms the same knowledge spread across 4 files of 50 lines each. The routing overhead (Claude deciding which file to load, when) adds a meta-reasoning layer that introduces failure points without improving output quality.
+
+**Only move to the architected path (below) when you can answer YES to**: "Would loading ALL reference content on a simple question waste Claude's attention on irrelevant knowledge?" If total knowledge is under ~300 lines, the answer is almost always no — stay simple.
+
+---
+
+## The Three Design Decisions (Architected Path)
+
+Use this path when the skill has genuinely different knowledge domains. Every architected skill's design comes down to three questions:
 
 ### 1. Map the conversation flow
 
@@ -173,11 +196,18 @@ These aren't arbitrary limits — they're based on how Claude actually processes
 
 ## When to Keep It Simple
 
-Not every skill needs reference files. If the skill is:
-- A formatting shortcut
-- A simple template filler
-- Straightforward instructions with no domain knowledge
+The simple path isn't just for trivial skills. It's the right choice for:
 
-Then just write a clean SKILL.md. No reference files needed. The architecture step still matters — you're just deciding that the answer is "keep it flat."
+- **Knowledge/advisor skills with one domain** — the most common type. "Turn this transcript into an advisor" is almost always a simple skill.
+- **Skills built from transcripts, books, or course content** — one body of knowledge, many applications.
+- **Workflow skills with a linear (non-branching) flow** — steps happen in order, no conditional paths.
+- **Formatting and template skills** — straightforward instructions, maybe no reference files at all.
+- **Skills where total reference content is under ~300 lines** — even if it covers multiple topics, it's not worth splitting.
 
-The goal isn't complexity. The goal is the right structure for what the skill does.
+The architected path is for:
+- **Multi-domain skills** — offers + sales + leads = different frameworks for different questions.
+- **Skills where loading all knowledge every time would exceed ~300 lines** of reference content.
+- **Platform-specific skills** with genuinely different paths (e.g., Claude Code vs. Claude.ai).
+- **Skills where the independence test passes** — each reference file is useful on its own, without the others.
+
+The goal isn't complexity. The goal is the right structure for what the skill does. When in doubt, start simple. You can always split a reference file into multiple files later if you find Claude is loading irrelevant knowledge. But simplifying an over-architected skill is harder than upgrading a simple one.

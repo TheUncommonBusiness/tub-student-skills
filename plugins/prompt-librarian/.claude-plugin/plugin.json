@@ -1,0 +1,6 @@
+{
+  "name": "prompt-librarian",
+  "description": "Auto-detect when a prompt has been collaboratively built during a session and offer to add it to the Master Prompt Library in Notion.",
+  "version": "1.0.0",
+  "author": {"name": "The Uncommon Business"}
+}

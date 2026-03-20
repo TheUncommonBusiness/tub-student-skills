@@ -1,10 +1,10 @@
 ---
 name: tub-skill-creator
-version: "1.1.0"
-description: "Build custom Claude skills for your business. Create, test, improve, and ship reusable skills that solve real problems. Use this skill when someone says build a skill, create a skill, I want to make a skill, turn this into a skill, help me build a thing that does X, make a reusable prompt, or asks how to make Claude do something repeatedly. Also triggers on skill creator, skill builder, automate this workflow, package this as a skill, I keep doing the same thing over and over, or can Claude learn to do this. Handles the full lifecycle: architecture design, writing, testing, benchmarking, description optimization, and deployment."
+version: "1.2.1"
+description: "Build custom Claude skills for your business. Create, test, improve, and ship reusable skills that solve real problems. Use this skill when someone says 'build a skill,' 'create a skill,' 'I want to make a skill,' 'turn this into a skill,' 'help me build a thing that does X,' 'make a reusable prompt,' or asks how to make Claude do something repeatedly. Also triggers on 'skill creator,' 'skill builder,' 'automate this workflow,' 'package this as a skill,' 'I keep doing the same thing over and over,' or 'can Claude learn to do this.' Handles the full lifecycle: architecture design, writing, testing, benchmarking, description optimization, and deployment."
 user-invocable: true
 ---
-> **v1.1.0** | Built by Carter Jensen | 2026-03-17
+> **v1.2.1** | Add TUB team marketplace deployment note to Phase 9 | 2026-03-20
 
 # TUB Skill Creator
 
@@ -91,7 +91,23 @@ Walk through these questions one at a time — don't dump them all at once:
 
 > *"Before we write any instructions, let's design the structure. Think of it like a blueprint — we figure out what rooms the house needs before we start building."*
 
-Load `references/architecture-guide.md` and walk through the three design decisions:
+Load `references/architecture-guide.md` for the full methodology. But first — decide which path this skill needs.
+
+### First: Simple or Architected?
+
+Before designing anything, answer one question with the user:
+
+> *"Does this skill need to pull from DIFFERENT knowledge depending on what the user asks? Or is it one body of knowledge applied to different situations?"*
+
+**One body of knowledge** (most skills — especially "turn this content into an advisor"):
+→ **Simple path.** SKILL.md + 1 dense reference file. Skip Decision 2 entirely. Go straight to Decision 1 (conversation flow) and Decision 3 (SKILL.md's job). This is the right choice ~80% of the time.
+
+**Multiple distinct domains** (e.g., a business advisor covering offers AND sales AND leads, each with different frameworks where loading all of them on a simple question would waste Claude's attention):
+→ **Architected path.** Full three-decision design. Multiple reference files with conditional loading.
+
+**Default to simple.** Only go architected when the user describes genuinely different knowledge domains that need different files. The test: "Would loading ALL the reference content on a simple question waste Claude's attention on irrelevant knowledge?" If the answer is no — or if the total knowledge is under ~300 lines — stay simple.
+
+> *Why simple wins: Research shows that every additional reference file adds routing overhead and context load. A single, well-distilled 200-line reference file consistently outperforms the same knowledge spread across 4 files of 50 lines each. Every token Claude loads that isn't relevant to the current question actively degrades performance — it's not neutral filler, it's negative signal.*
 
 ### Decision 1: Map the conversation flow
 What questions will the skill ask the user? What different paths are there? What order do things happen in?
@@ -108,12 +124,17 @@ User says "help me with X"
 
 **Teach the diagnostic-first pattern**: "Great skills ask before they answer. They diagnose the user's situation, pick the right approach, THEN give targeted advice. Skills that skip diagnosis give generic output every time."
 
-### Decision 2: Design the reference files
-What knowledge files does the skill need? For each file, define: what topic it covers, roughly how long it is, and when it gets loaded.
+### Decision 2: Design the reference files (architected path only)
+
+**Skip this for simple-path skills.** They get one reference file designed in Phase 4.
+
+For architected skills: What knowledge files does the skill need? For each file, define: what topic it covers, roughly how long it is, and when it gets loaded.
 
 **Conditional loading is key**: "Each reference file loads only when the conversation needs it. Not everything at once."
 
 Load `references/skill-patterns.md` to show real examples of skills with lean routers + focused reference files.
+
+**The independence test**: Each reference file should be useful ON ITS OWN. If you'd always need to load files A and B together, they should be one file.
 
 ### Decision 3: Define the SKILL.md's job
 The SKILL.md is the conductor, not the orchestra. It contains:
@@ -126,7 +147,15 @@ Domain knowledge goes in reference files. Not in the SKILL.md.
 
 ### Present the architecture for approval
 
-Show the user a folder tree with 1-sentence descriptions:
+**Simple path:**
+```
+my-skill/
+├── SKILL.md              ← Diagnostic flow + format + quality checks (~80-150 lines)
+└── references/
+    └── knowledge.md      ← All distilled domain knowledge (~150-250 lines)
+```
+
+**Architected path:**
 ```
 my-skill/
 ├── SKILL.md              ← Diagnostic flow + routing (~X lines)
@@ -138,21 +167,45 @@ my-skill/
 
 Get their sign-off before writing anything.
 
-**Simple-skill exception**: If the skill is straightforward, say so: "This is simple enough for just a SKILL.md — no reference files needed."
-
 ---
 
 ## Phase 4: Source Material
 
 If the user has raw content (books, transcripts, PDFs, presentations) to build from:
 
-1. Have them share the files (paste content, upload, or point to a folder)
-2. Read through the material and identify the 3-5 most important elements
-3. Distill into focused reference files — one topic per file, under 300 lines each
-
 > *"Think of it like onboarding a new employee. You wouldn't hand them 600 pages. You'd give them a one-pager on the key frameworks, a style guide, and some great examples."*
 
-**Size guardrails**: Each reference file under 300 lines. Total across all files under 1,000 lines. If you need more, the skill is probably trying to do too much — split it.
+1. Have them share the files (paste content, upload, or point to a folder)
+2. Read through the material and identify the 3-5 most important elements
+3. Distill based on which path was chosen in Phase 3:
+
+### For simple-path skills (1 reference file):
+
+Distill ALL source material into ONE dense reference file. Target 150-250 lines. Structure it by topic with clear headers, but keep it in a single file. This is the most common path.
+
+The file should contain:
+- Core frameworks (extracted and compressed, not summarized or quoted)
+- Key heuristics and decision rules
+- Voice/tone patterns (if applicable — a section within the file, not a separate file)
+- 3-5 worked examples of great output
+
+Name it descriptively: `knowledge.md`, `frameworks.md`, or `[domain]-guide.md`.
+
+### For architected-path skills (multiple reference files):
+
+Split into multiple files ONLY when topics are truly independent — loading one WITHOUT the others still produces good output for that domain. If you'd always need to load 2-3 files together, they should be 1 file.
+
+Each file: one topic, under 300 lines, distilled knowledge (not raw dumps). Total across all files under 1,000 lines.
+
+### Distillation is the hard work
+
+This phase is where the real value happens. Raw content → distilled reference files is the transformation that makes skills work. Guide the user through it carefully:
+
+1. **Read** the raw content and identify the core frameworks, not the examples or stories around them
+2. **Extract** the decision-making tools — the things that change how someone acts, not just what they know
+3. **Compress** — if a concept takes 3 pages in the source, it should take 5-10 lines in the reference file
+4. **Cut** — tangents, repetition, context that was useful for the original audience but not for the skill
+5. **Verify** — read the distilled version back. Does it contain everything the skill needs to give great advice? Is there anything Claude already knows that you can remove?
 
 If no source material, skip to Phase 5.
 
@@ -317,8 +370,10 @@ Your skill files go in a `.claude/skills/` folder:
 ```
 Claude Code auto-discovers skills in this folder. Drop the files there and it's live.
 
+> **TUB team deployment:** If you are on the TUB team, deployment is handled by the root CLAUDE.md Rule 8 flow. Just say who should have access — you, the team, or students — and Claude will handle deploying to the shared drive and pushing to the correct marketplace repos (`tub-skills` for team, `tub-student-skills` + `tub-student-skills-org` for students) automatically. No manual steps needed.
+
 **On Cowork (team platform):**
-Skills are uploaded by an admin through **Organization Settings > Skills**. Package the skill as a zip file and send it to your admin with instructions.
+Skills are synced automatically via marketplace repos connected in Organization Settings > Plugins. Team skills come from `tub-skills`, student skills from `tub-student-skills-org`.
 
 **If none of that makes sense** — just say so, and the skill coach will output the complete SKILL.md content so the user can copy-paste it wherever they need it.
 

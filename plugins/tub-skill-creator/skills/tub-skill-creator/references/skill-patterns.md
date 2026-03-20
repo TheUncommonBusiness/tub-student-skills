@@ -4,6 +4,36 @@ Real examples showing what separates great skills from okay ones. Use these as m
 
 ---
 
+## Pattern 0: The Well-Distilled Simple Skill
+
+### The most common (and most effective) pattern
+
+```
+skill-name/
+├── SKILL.md (80-120 lines)
+│   ├── Role + tone definition
+│   ├── Diagnostic question flow
+│   ├── "Read references/knowledge.md" (always loaded)
+│   ├── Output format
+│   └── Quality checks
+└── references/
+    └── knowledge.md (150-250 lines)
+        ├── Core frameworks (extracted from source material)
+        ├── Key heuristics and decision rules
+        ├── Voice patterns (if applicable)
+        └── Worked examples
+```
+
+This pattern works for ~80% of skills people actually build. The entire skill loads ~300-370 lines total. Claude has full context with room to think.
+
+**When to use this**: You have source material (transcripts, books, frameworks) and want Claude to apply that knowledge in conversations. The knowledge is one domain, not multiple independent domains.
+
+**Why it works**: Research shows that LLM performance degrades with every additional document loaded into context — even when the model can perfectly retrieve the information. One dense, well-organized file gives Claude everything it needs without the routing overhead of deciding which file to load when.
+
+**When to upgrade to Pattern 1**: You find that loading ALL the knowledge on every request is wasteful — the user asks about pricing and Claude has 200 lines of unrelated content marketing frameworks in context. That's the signal to split.
+
+---
+
 ## Pattern 1: Monolithic vs. Modular (Before/After)
 
 ### Before: The Monolith (520 lines, one file)
