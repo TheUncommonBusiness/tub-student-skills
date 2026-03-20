@@ -5,64 +5,16 @@
     "email": "hello@theuncommonbusiness.com"
   },
   "metadata": {
-    "description": "Official skill library for TUB students. AI-powered tools for business builders in A2A, SuperHuman, and UCL programs.",
-    "version": "1.0.0"
+    "description": "Student skill marketplace for The Uncommon Business programs.",
+    "version": "2.0.0"
   },
   "plugins": [
     {
-      "name": "idea-validator",
-      "source": "./plugins/idea-validator",
-      "description": "Pressure-test a digital product idea before building it. Scores across 5 dimensions and delivers a BUILD, RESHAPE, or SHELF verdict.",
-      "version": "1.0.2",
-      "author": {
-        "name": "Carter Jensen"
-      },
-      "keywords": [
-        "product",
-        "validation",
-        "strategy"
-      ],
-      "category": "strategy"
-    },
-    {
-      "name": "prompt-librarian",
-      "source": "./plugins/prompt-librarian",
-      "description": "Auto-detect when a prompt has been collaboratively built during a session and offer to add it to the Master Prompt Library in Notion.",
+      "name": "tub-student-skills",
+      "source": "./plugins/tub-student-skills",
+      "description": "Skill toolkit for TUB students. Build skills, validate ideas, browse available tools, and save prompts to the library.",
       "version": "1.0.0",
-      "author": {
-        "name": "The Uncommon Business"
-      }
-    },
-    {
-      "name": "tub-skill-creator",
-      "source": "./plugins/tub-skill-creator",
-      "description": "Build custom Claude skills for your business. Create, test, improve, and ship reusable skills that solve real problems.",
-      "version": "1.2.1",
-      "author": {
-        "name": "Carter Jensen"
-      },
-      "keywords": [
-        "skills",
-        "automation",
-        "building"
-      ],
-      "category": "productivity"
-    },
-    {
-      "name": "tub-skills-browser",
-      "source": "./plugins/tub-skills-browser",
-      "description": "Browse all available TUB student skills. Type /tub-skills to see what is available.",
-      "version": "1.0.0",
-      "author": {
-        "name": "Carter Jensen"
-      },
-      "keywords": [
-        "browse",
-        "list",
-        "help",
-        "discovery"
-      ],
-      "category": "utility"
+      "author": {"name": "The Uncommon Business"}
     }
   ]
 }

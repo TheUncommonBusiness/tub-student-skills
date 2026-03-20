@@ -1,0 +1,8 @@
+{
+  "name": "tub-student-skills",
+  "description": "Skill toolkit for TUB students. Build skills, validate ideas, browse available tools, and save prompts to the library.",
+  "version": "1.0.0",
+  "author": {
+    "name": "The Uncommon Business"
+  }
+}
