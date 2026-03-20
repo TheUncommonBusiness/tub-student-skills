@@ -1,0 +1,35 @@
+{
+  "name": "tub-student-skills",
+  "owner": {
+    "name": "The Uncommon Business",
+    "email": "hello@theuncommonbusiness.com"
+  },
+  "metadata": {
+    "description": "Official skill library for TUB students. AI-powered tools for business builders in A2A, SuperHuman, and UCL programs.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "idea-validator",
+      "source": "./plugins/idea-validator",
+      "description": "Pressure-test a digital product idea before building it. Scores across 5 dimensions and delivers a BUILD, RESHAPE, or SHELF verdict.",
+      "version": "1.0.2",
+      "author": {
+        "name": "Carter Jensen"
+      },
+      "keywords": ["product", "validation", "strategy"],
+      "category": "strategy"
+    },
+    {
+      "name": "tub-skill-creator",
+      "source": "./plugins/tub-skill-creator",
+      "description": "Build custom Claude skills for your business. Create, test, improve, and ship reusable skills that solve real problems.",
+      "version": "1.1.0",
+      "author": {
+        "name": "Carter Jensen"
+      },
+      "keywords": ["skills", "automation", "building"],
+      "category": "productivity"
+    }
+  ]
+}

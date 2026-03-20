@@ -1,13 +1,8 @@
 ---
 name: tub-skill-creator
 version: "1.1.0"
-description: "Build custom Claude skills for your business. Create, test, improve, and ship reusable skills that solve real problems. Use this skill when someone says 'build a skill,' 'create a skill,' 'I want to make a skill,' 'turn this into a skill,' 'help me build a thing that does X,' 'make a reusable prompt,' or asks how to make Claude do something repeatedly. Also triggers on 'skill creator,' 'skill builder,' 'automate this workflow,' 'package this as a skill,' 'I keep doing the same thing over and over,' or 'can Claude learn to do this.' Handles the full lifecycle: architecture design, writing, testing, benchmarking, description optimization, and deployment."
+description: "Build custom Claude skills for your business. Create, test, improve, and ship reusable skills that solve real problems. Use this skill when someone says build a skill, create a skill, I want to make a skill, turn this into a skill, help me build a thing that does X, make a reusable prompt, or asks how to make Claude do something repeatedly. Also triggers on skill creator, skill builder, automate this workflow, package this as a skill, I keep doing the same thing over and over, or can Claude learn to do this. Handles the full lifecycle: architecture design, writing, testing, benchmarking, description optimization, and deployment."
 user-invocable: true
-metadata:
-  audience: "all"
-  cowork_compatible: true
-  requires_cli: []
-  requires_env: []
 ---
 > **v1.1.0** | Built by Carter Jensen | 2026-03-17
 

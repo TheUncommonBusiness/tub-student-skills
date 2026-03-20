@@ -1,0 +1,8 @@
+{
+  "name": "idea-validator",
+  "description": "Pressure-test a digital product idea before building it. Scores across 5 dimensions and delivers a BUILD, RESHAPE, or SHELF verdict.",
+  "version": "1.0.2",
+  "author": {
+    "name": "Carter Jensen"
+  }
+}

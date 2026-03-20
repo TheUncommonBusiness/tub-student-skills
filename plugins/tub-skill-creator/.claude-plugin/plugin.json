@@ -1,0 +1,8 @@
+{
+  "name": "tub-skill-creator",
+  "description": "Build custom Claude skills for your business. Create, test, improve, and ship reusable skills that solve real problems.",
+  "version": "1.1.0",
+  "author": {
+    "name": "Carter Jensen"
+  }
+}

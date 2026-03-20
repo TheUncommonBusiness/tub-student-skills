@@ -1,60 +1,77 @@
 # TUB Student Skills
 
-Official skill library for [The Uncommon Business](https://theuncommonbusiness.com) students.
+Official skill marketplace for [The Uncommon Business](https://theuncommonbusiness.com) students.
 
-Skills supercharge your Claude Code experience — they teach Claude how to do specific tasks the way TUB teaches them.
+Skills supercharge your Claude experience — they teach Claude how to do specific tasks the way TUB teaches them.
 
-## How to install a skill
+## How to Install (Cowork)
 
-1. Browse the `skills/` folder and find one you like
-2. Open Claude Code and say:
+Your admin can add this marketplace to your Cowork organization:
 
-```
-Install the [skill-name] skill from TheUncommonBusiness/tub-student-skills
-```
+1. Go to **Organization Settings > Plugins**
+2. Click **Add marketplace**
+3. Enter: `TheUncommonBusiness/tub-student-skills`
+4. Click **Sync**
 
-Claude will handle the rest.
+Once synced, all team members can browse and install skills from the plugin list.
 
-**Or install manually:**
+## How to Install (Claude Code)
 
 ```bash
-# Clone just the skill you want
-gh repo clone TheUncommonBusiness/tub-student-skills
-cp -r tub-student-skills/skills/[skill-name] ~/.claude/skills/[skill-name]
+# Install a specific plugin
+claude plugin install TheUncommonBusiness/tub-student-skills --plugin idea-validator
 ```
 
-## Available skills
+Or install manually:
 
-| Skill | Description |
-|---|---|
-| *Coming soon* | New skills are added regularly — star this repo to get notified |
+```bash
+gh repo clone TheUncommonBusiness/tub-student-skills
+cp -r tub-student-skills/plugins/idea-validator/skills/idea-validator ~/.claude/skills/
+```
 
-## Want to contribute?
+## Available Skills
 
-Built something great in Claude Code? We'd love to add it to the library.
+| Skill | Version | Description |
+|---|---|---|
+| **idea-validator** | 1.0.2 | Pressure-test a digital product idea before building. Scores across 5 dimensions — BUILD, RESHAPE, or SHELF. |
+| **tub-skill-creator** | 1.1.0 | Build custom Claude skills for your business. Full lifecycle: architecture, writing, testing, and deployment. |
+
+## Repository Structure
+
+```
+tub-student-skills/
+├── .claude-plugin/
+│   └── marketplace.json          # Marketplace manifest
+├── plugins/
+│   ├── idea-validator/
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json       # Plugin metadata
+│   │   └── skills/
+│   │       └── idea-validator/
+│   │           └── SKILL.md
+│   └── tub-skill-creator/
+│       ├── .claude-plugin/
+│       │   └── plugin.json
+│       └── skills/
+│           └── tub-skill-creator/
+│               ├── SKILL.md
+│               ├── references/
+│               ├── agents/
+│               ├── scripts/
+│               └── ...
+└── README.md
+```
+
+## Want to Contribute?
+
+Built something great? We'd love to add it to the library.
 
 1. Fork this repo
-2. Add your skill to `skills/your-skill-name/` with a `SKILL.md`
-3. Open a pull request with a description of what it does
+2. Create your plugin in `plugins/your-skill-name/` following the structure above
+3. Include a `.claude-plugin/plugin.json` and a `skills/your-skill-name/SKILL.md`
+4. Open a pull request
 
 The TUB team reviews all submissions.
-
-## Skill format
-
-Every skill needs a `SKILL.md` file with this structure:
-
-```markdown
----
-name: my-skill-name
-description: "What this skill does in one sentence"
----
-
-# Instructions for Claude
-
-[Your skill instructions here]
-```
-
-See any existing skill for a full example.
 
 ---
 
