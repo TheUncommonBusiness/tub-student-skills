@@ -5,14 +5,14 @@
     "email": "hello@theuncommonbusiness.com"
   },
   "metadata": {
-    "description": "Student skill marketplace for The Uncommon Business programs.",
-    "version": "2.0.0"
+    "description": "Student skill toolkit from The Uncommon Business.",
+    "version": "3.0.0"
   },
   "plugins": [
     {
-      "name": "tub-student-skills",
-      "source": "./plugins/tub-student-skills",
-      "description": "Skill toolkit for TUB students. Build skills, validate ideas, browse available tools, and save prompts to the library.",
+      "name": "tub-student",
+      "source": "./plugins/tub-student",
+      "description": "Skill toolkit for TUB students. Build skills, validate ideas, browse tools, and save prompts.",
       "version": "1.0.0",
       "author": {"name": "The Uncommon Business"}
     }
