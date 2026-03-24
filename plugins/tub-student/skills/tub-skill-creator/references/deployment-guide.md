@@ -1,6 +1,6 @@
 # Deployment Guide
 
-How to deploy skills at TUB: audience selection, platform routing, marketplace push, YAML sanitization, post-deployment checklist, and platform-specific handling.
+How to deploy skills at TUB: audience selection, platform routing, marketplace push, YAML sanitization, and platform-specific handling.
 
 ---
 
@@ -34,35 +34,56 @@ If the user picks "The team" or "The team and students," ask a follow-up:
 
 ## Post-Deployment Checklist
 
-This is mandatory. Never skip any step. Never defer steps to "later." If a step fails, stop and resolve it before moving on.
+After every skill deployment or update:
 
-### Step 1: SKILL.md Validation
-Before deploying, verify the SKILL.md has ALL required frontmatter fields:
-- Top-level: `name`, `version`, `description`
-- `metadata:` block: `audience`, `cowork_compatible`, `requires_cli`, `requires_env`
+1. **Validate SKILL.md** — Ensure `name`, `version`, `description` are set. Ensure `metadata:` block has `audience`, `cowork_compatible`, `requires_cli`, `requires_env`.
+2. **Deploy to Drive** — Copy to `.claude/skills/<skill-name>/`. Only runtime files: SKILL.md, references/, scripts/, assets/. Never copy source-material/ or evals/.
+3. **Update the registry** — Update `.claude/skill-registry.json` with version, audience, plugin, repo array, repo_synced, and today's date.
+4. **Push to GitHub** — Run the Marketplace Push Procedure (below) for all target repos. Update `repo_synced` in registry after each successful push.
+5. **Optional: Notion catalog** — Ask if the user wants to catalog in the TUB Skills Lab (`/skill-manager catalog`).
 
-If any field is missing, add it before deploying. Do not deploy skills with incomplete frontmatter.
+---
 
-### Step 2: Deploy to Drive
-Copy the skill folder to `.claude/skills/<skill-name>/`. Only runtime files: SKILL.md, references/, scripts/, assets/. Never copy source-material/ or evals/.
+## GitHub Repos
 
-### Step 3: Update the Registry
-Update `.claude/skill-registry.json` immediately:
-- Set `version` to match SKILL.md
-- Set `deployed: true`
-- Set `repo` array to list all target repos based on audience
-- Set `repo_synced: false` (will be set to `true` after repo push succeeds)
-- Set `updated` to today's date
-- Set `plugin` to the correct plugin name
+Both repos use the **official Claude Code plugin marketplace format** — each has a `.claude-plugin/marketplace.json` at root, and each plugin folder has a `.claude-plugin/plugin.json` manifest.
 
-### Step 4: Push to Marketplace Repo(s)
-Run the Marketplace Push Procedure (below) for all target repos based on audience. After each successful push, update the registry entry's `repo_synced` to `true`.
+| Repo | Visibility | Purpose |
+|------|-----------|---------|
+| `TheUncommonBusiness/tub-skills` | Private | Source of truth for Cowork sync. Contains 3 plugins: tub-mandatory, tub-optional, tub-student. |
+| `TheUncommonBusiness/tub-student-skills` | Public | Mirror of just the tub-student plugin. For students on Claude Code who cannot access the private repo. |
 
-### Step 5: Notion Cataloging
-Ask the user if they want to catalog in the TUB Skills Lab Notion database. If yes, invoke `/skill-manager catalog`.
+### Repo structure (tub-skills)
 
-### Step 6: Sync Audit
-Run `/skill-manager audit` to verify all locations match. This step is mandatory. Do not skip it.
+```
+tub-skills/
+  .claude-plugin/
+    marketplace.json           ← lists all 3 plugins
+  plugins/
+    tub-mandatory/
+      .claude-plugin/
+        plugin.json            ← plugin manifest (name, version, description)
+      skills/
+        callan-voice/SKILL.md
+        skill-manager/SKILL.md
+        ...
+    tub-optional/
+      .claude-plugin/
+        plugin.json
+      skills/
+        hook-engine/SKILL.md
+        9ff-advisor/SKILL.md
+        ...
+    tub-student/
+      .claude-plugin/
+        plugin.json
+      skills/
+        idea-validator/SKILL.md
+        tub-skill-creator/SKILL.md
+        ...
+```
+
+Cowork syncs from these repos automatically via Organization Settings > Plugins. Admins control visibility per plugin using installation preferences: Required, Installed by default, Available for install, or Not available.
 
 ---
 
@@ -71,12 +92,12 @@ Run `/skill-manager audit` to verify all locations match. This step is mandatory
 For each target repo, run these steps in order:
 
 ### 1. Check GitHub auth
-Run `gh auth status`. If not authenticated, skip this repo entirely. Set `repo_synced: false` in the registry and warn: "Not pushed to [repo] — someone with GitHub access can sync it later."
+Run `/opt/homebrew/bin/gh auth status`. If not authenticated, skip this repo. Set `repo_synced: false` in the registry and warn: "GitHub push skipped — someone with access can sync it later."
 
 ### 2. Clone the repo
 Shallow clone to `/tmp/<repo-name>/`:
 ```bash
-git clone --depth 1 https://github.com/TheUncommonBusiness/<repo-name>.git /tmp/<repo-name>/
+/opt/homebrew/bin/gh repo clone TheUncommonBusiness/<repo-name> /tmp/<repo-name>/ -- --depth 1
 ```
 
 ### 3. Copy the skill folder
@@ -89,192 +110,99 @@ Do NOT include: source-material/, evals/, workspace/, or other build artifacts.
 If the skill already exists there, replace it.
 
 ### 4. Sanitize the SKILL.md copy
-Apply Marketplace YAML Sanitization (see below) to the copy in the repo. Never modify the original on Google Drive.
+Apply YAML sanitization (see below) to the **repo copy only**. Never modify the original on Google Drive.
 
-### 5. Commit
+### 5. Commit and push
 ```bash
+cd /tmp/<repo-name>
 git add -A && git commit -m "deploy: <skill-name> v<version>"
-```
-
-### 6. Push
-```bash
 git push origin main
 ```
 
-### 7. Verify
-```bash
-gh api "repos/TheUncommonBusiness/<repo-name>/commits?per_page=1"
-```
-Confirm the latest commit matches what you just pushed.
+### 6. Handle failures
+If push fails (e.g., conflict), try `git pull --rebase origin main && git push origin main`. If it still fails, warn the user and set `repo_synced: false`.
 
-### 8. Handle failures
-If push fails (e.g., conflict), try:
+### 7. Clean up
 ```bash
-git pull --rebase origin main && git push origin main
+rm -rf /tmp/<repo-name>
 ```
-If it still fails, warn the user and set `repo_synced: false` in the registry.
+
+**Important**: Do NOT create new plugin folders. All skills go inside the existing plugin folder for their audience. Do NOT edit marketplace.json for individual skills — it lists plugins, not skills. Only bump the plugin version in plugin.json and the corresponding marketplace.json entry when skills are added or updated.
 
 ---
 
 ## Marketplace YAML Sanitization
 
-Cowork's YAML parser is stricter than Claude Code's. Always sanitize the repo copy of the SKILL.md. Never modify the original on Google Drive or in `.claude/skills/`.
+When pushing a skill to any GitHub repo, sanitize the SKILL.md copy in the repo. Never modify the original on Google Drive.
 
-### What to sanitize
+**Rules:**
+1. **Strip the entire `metadata:` block** — Cowork's YAML parser cannot handle nested objects
+2. **Remove `argument-hint:`** if present
+3. **Keep only these top-level fields**: `name`, `version`, `description`, `user-invocable`, `disable-model-invocation`
+4. **`description` MUST be a single-line double-quoted string** — never use folded scalars (`>`) or block scalars (`|`). Cowork silently skips skills with multiline descriptions. Replace apostrophes with plain alternatives (`you're` → `you are`)
 
-**1. Strip the `metadata:` nested block entirely.**
-Cowork does not handle nested YAML objects. Remove the whole thing:
-```yaml
-# REMOVE this entire block from the repo copy:
-metadata:
-  audience: "internal"
-  cowork_compatible: true
-  requires_cli: []
-  requires_env: []
-```
-
-**2. Remove `argument-hint:` if present.**
-Not a supported field in Cowork's parser.
-
-**3. Replace apostrophes and curly quotes in the `description:` value.**
-Change `you're` to `you are`, `don't` to `do not`, etc. Cowork's parser can misinterpret these inside quoted strings.
-
-**4. CRITICAL: The `description:` field MUST be a single-line double-quoted string.**
-Do NOT use YAML folded scalars (`>`), block scalars (`|`), or multiline values. Cowork silently skips the entire skill if the description uses these formats. No error message, the skill just never appears.
-
-Keep the repo description concise (under ~200 characters). The full description stays in the Google Drive version only.
-
-**5. Keep only these top-level frontmatter fields:**
-`name`, `version`, `description`, `user-invocable`
-
-### Example: Before and after
-
-**Google Drive version (stays unchanged):**
-```yaml
----
-name: my-skill
-version: "1.0.0"
-description: >
-  Does something when you're working on X. This is a long
-  description that spans multiple lines.
-user-invocable: true
-argument-hint: "Describe your situation"
-metadata:
-  audience: "internal"
-  cowork_compatible: true
-  requires_cli: []
-  requires_env: []
----
-```
-
-**Marketplace repo version (sanitized):**
-```yaml
----
-name: my-skill
-version: "1.0.0"
-description: "Does something when you are working on X. Concise single-line description."
-user-invocable: true
----
-```
-
-Only the SKILL.md frontmatter needs sanitization. Reference files and other supporting files are fine as-is.
+Only the SKILL.md frontmatter needs sanitization. Reference files, scripts, and other supporting files are copied as-is.
 
 ---
 
 ## Student-Facing Protections
 
-Four hard rules that apply to every student-audience skill. No exceptions.
+Four hard rules for every student-audience skill. No exceptions.
 
 ### 1. No shared org API keys
-Student skills always require each student to provide their own keys. The "Share one key with the org" option is never offered for student skills.
+Student skills always require each student to provide their own keys. The "Share one key with the org" option is never offered.
 
 ### 2. Key scan before deployment
-Automatically scan SKILL.md and any bundled files for hardcoded keys. Look for patterns: `sk-`, `AIza-`, `gsk_`, and long alphanumeric strings. If found, halt deployment and tell the user to remove them.
+Scan SKILL.md and bundled files for hardcoded keys (`sk-`, `AIza-`, `gsk_`, long alphanumeric strings). Halt deployment if found.
 
 ### 3. Mandatory Setup section
-Any skill with `requires_env` or `requires_cli` must have a `## Setup` section that includes:
-- What the student needs
-- Where to get it (direct links)
-- Step-by-step instructions written for non-technical users
-- A verification command to test the setup
-- Cost warnings if applicable
-
-If the author does not provide this, generate it automatically.
+Any skill with `requires_env` or `requires_cli` must have a `## Setup` section with: what they need, where to get it (direct links), step-by-step instructions for non-technical users, a verification command, and cost warnings if applicable. Generate it automatically if the author doesn't provide it.
 
 ### 4. Registry enforces individual keys
-All student-audience skills must have `"key_sharing": "individual"` in the registry. No exceptions.
+All student-audience skills must have `"key_sharing": "individual"` in the registry.
 
 ---
 
 ## API Key Handling (Team Skills Only)
 
 When deploying a team skill that requires API keys, ask:
-- **"Share one key with the org"** — Store in `.claude/.env` at the shared Launch Points root. Warn the user about visibility and billing implications.
-- **"Each user provides their own"** — Do not store any key. Make sure the SKILL.md has a clear setup section with env var names, where to get keys, and export commands.
+- **"Share one key with the org"** — Store in `.claude/.env` at the shared Launch Points root. Warn about visibility and billing.
+- **"Each user provides their own"** — Do not store any key. Ensure the SKILL.md has a clear setup section.
 
-This step only applies to team skills. Personal skills skip it (the author manages their own keys). Student skills always use individual keys (see protections above).
+Personal skills skip this (the author manages their own keys). Student skills always use individual keys.
 
 ---
 
 ## Cowork Session Limitations
 
-Cowork cannot write to `.claude/skills/` directly and cannot push to GitHub. Here is how each audience option works from Cowork:
+Cowork cannot write to `.claude/skills/` or push to GitHub.
 
 ### "Just for me" — works normally
-Cowork CAN write to the user's deliverables folder. Save the skill to `User Deliverables [CCW-LP]/[user]-deliverables/[name]_skills/<skill-name>/`.
-
-Then walk the user through manual Cowork installation:
-1. Go to Browse plugins (top-right of Cowork sidebar)
-2. Click the Personal tab
-3. Click Local uploads, then the + button
-4. Upload the SKILL.md file from deliverables
-5. Cowork will prompt to add the skill — click Add
+Save to `User Deliverables [CCW-LP]/[user]-deliverables/[name]_skills/<skill-name>/`. Walk the user through manual Cowork installation (Browse plugins > Personal > Local uploads > upload SKILL.md).
 
 ### "The team" or "The team and students" — Slack handoff
-Save the skill to the user's deliverables folder, then send a deployment request to Slack #AgentUpdates tagging @Carter Jensen:
+Save to the user's deliverables folder, then send a deployment request to Slack #AgentUpdates tagging @Carter Jensen:
 
 > **Skill Deployment Request**
 > **Skill:** [skill-name] v[version]
 > **Built by:** [user name]
 > **Audience:** [The team / The team and students]
 > **Location:** `User Deliverables [CCW-LP]/[user]-deliverables/[name]_skills/[skill-name]/`
-> **Description:** [one-line description from SKILL.md]
->
-> This skill was built in Cowork and needs a Claude Code user to deploy it via Rule 8.
+> **Description:** [one-line description]
 
 ### Skill updates from Cowork
-Same Slack handoff pattern, but with an update request message:
-
-> **Skill Update Request**
-> **Skill:** [skill-name] (currently v[current] to proposed v[bumped])
-> **Updated by:** [user name]
-> **What changed:** [1-2 sentence summary]
-> **Location:** `User Deliverables [CCW-LP]/[user]-deliverables/[name]_skills/[skill-name]/`
-
----
-
-## GitHub Repos
-
-Three repos in play:
-
-| Repo | Visibility | Purpose |
-|------|-----------|---------|
-| `TheUncommonBusiness/tub-skills` | Private | Source of truth for Cowork sync. Contains 3 plugins: tub-mandatory, tub-optional, tub-student. Both team and student Cowork orgs sync from here. |
-| `TheUncommonBusiness/tub-student-skills` | Public | Mirror of just the tub-student plugin. For students on Claude Code who cannot access the private repo. |
-| `TheUncommonBusiness/tub-student-skills-org` | -- | DEPRECATED. Student Cowork org now syncs from tub-skills directly. |
+Same Slack handoff, but with an update request noting what changed and the proposed version bump.
 
 ---
 
 ## Registry Entry Format
 
-Every deployed skill gets an entry in `.claude/skill-registry.json` with these fields: `name`, `version`, `source`, `author`, `description`, `audience`, `cowork_compatible`, `requires_cli`, `requires_env`, `key_sharing`, `installed`, `updated`, `deployed`, `plugin`, `repo` (array of target repos), `repo_synced` (whether all repos match).
+Every deployed skill gets an entry in `.claude/skill-registry.json`:
 
-Key fields to watch: `deployed` (on shared drive?), `plugin` (which Cowork plugin), `repo` (which marketplace repos), `repo_synced` (all repos match deployed version?).
+Key fields: `name`, `version`, `description`, `audience`, `plugin` (which Cowork plugin), `cowork_compatible`, `requires_cli`, `requires_env`, `deployed` (on shared drive?), `repo` (which marketplace repos), `repo_synced` (all repos match deployed version?), `installed`, `updated`.
 
 ---
 
 ## Skill Archives
 
-Before deploying updates, archive the previous version to `Skills Repository [CCW-LP]/skill-archives/` with a date suffix (e.g., `hook-engine-2026-03-15/`).
-
-To roll back, say "roll back [skill name]." Claude restores from `skill-archives/` (or Google Drive version history), redeploys to `.claude/skills/`, and pushes to marketplace repos if needed. Student-facing skills can also revert from git history.
+Before deploying updates, archive the previous version to `Skills Repository [CCW-LP]/skill-archives/` with a date suffix. To roll back, say "roll back [skill name]" — Claude restores from archives or Google Drive version history and redeploys.

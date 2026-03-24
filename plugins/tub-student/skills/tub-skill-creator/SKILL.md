@@ -1,10 +1,10 @@
 ---
 name: tub-skill-creator
-version: "2.0.0"
-description: "Build, test, and deploy reusable Claude skills for your business. Guides the full lifecycle from idea to deployment."
+version: "2.1.0"
+description: "Build custom Claude skills for your business. Create, test, improve, and ship reusable skills that solve real problems. Use this skill when someone says 'build a skill,' 'create a skill,' 'I want to make a skill,' 'turn this into a skill,' 'help me build a thing that does X,' 'make a reusable prompt,' or asks how to make Claude do something repeatedly. Also triggers on 'skill creator,' 'skill builder,' 'automate this workflow,' 'package this as a skill,' 'I keep doing the same thing over and over,' or 'can Claude learn to do this.' ALSO TRIGGER when Claude recognizes a task is becoming a reusable workflow -- even if the user never says 'skill.' Examples: 'I want to repurpose newsletters for LinkedIn every week,' 'I need a repeatable process for X,' 'every time the newsletter comes out I have to,' 'I do this twice a week and it takes forever,' 'I want to automate how we do X,' 'can you build me something that does X every time.' If a user describes a repeated task that would benefit from being formalized, invoke this skill to guide the build process rather than building freestyle. Handles the full lifecycle: architecture design, writing, testing, benchmarking, description optimization, and deployment."
 user-invocable: true
 ---
-> **v2.0.0** | Unified skill creator — merged Skills Repository CLAUDE.md into single skill | 2026-03-23
+> **v2.1.0** | Updated deployment guide to match official Claude Code plugin marketplace format. Simplified post-deployment checklist, added repo structure docs, removed deprecated repo references. | 2026-03-23
 
 # TUB Skill Creator
 
@@ -403,16 +403,15 @@ Then follow the root CLAUDE.md Rule 8 deployment flow for the selected audience.
 
 **Cowork session limitation:** Cowork cannot deploy directly to `.claude/skills/` or push to GitHub. If building in Cowork, save to the user's deliverables folder and send a deployment request to Slack #AgentUpdates tagging @Carter Jensen with the skill name, version, audience, location, and description. Confirm to the user that the request was sent.
 
-### Post-deployment checklist (MANDATORY — never skip, never defer)
+### Post-deployment checklist
 
-Load `references/deployment-guide.md` for detailed procedures on each step:
+Load `references/deployment-guide.md` for detailed procedures:
 
-1. **Validate SKILL.md** — All frontmatter fields present (`name`, `version`, `description`, `metadata` block). Add any missing fields.
+1. **Validate SKILL.md** — All frontmatter fields present (`name`, `version`, `description`, `metadata` block).
 2. **Deploy to Drive** — `.claude/skills/<skill-name>/`
-3. **Update registry** — `.claude/skill-registry.json` with version, deployed, repo, repo_synced, updated.
-4. **Push to marketplace repo(s)** — Per the Marketplace Push Procedure in the deployment guide.
-5. **Notion cataloging** — Ask user. If yes, invoke `/skill-manager catalog`.
-6. **Sync audit** — `/skill-manager audit`. Mandatory.
+3. **Update registry** — `.claude/skill-registry.json` with version, audience, plugin, repo array, and today's date.
+4. **Push to GitHub** — Per the Marketplace Push Procedure in the deployment guide. Sanitize SKILL.md for repo (strip metadata block, single-line description).
+5. **Optional: Notion catalog** — Ask user. If yes, invoke `/skill-manager catalog`.
 
 ### Project README and ownership
 
